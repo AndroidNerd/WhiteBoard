@@ -47,12 +47,63 @@ public class WhiteBoard extends SurfaceView implements SurfaceHolder.Callback, R
 
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+package com.nxt.whiteboard;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+
+/**
+ * Created by nxt on 2016/11/23.
+ */
+
+public class WhiteBoard extends SurfaceView implements SurfaceHolder.Callback, Runnable {
+    private SurfaceHolder mSurfaceHolder;
+    private Canvas mCanvas;
+    private boolean startDraw;
+    private Path mPath = new Path();
+    private Paint mPaint = new Paint();
+    private Bitmap mBitmap;
+    private Canvas canvas;
+    private Drawable mDrawable;
+
+    public WhiteBoard(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        initView();
+    }
+
+    private void initView() {
+        mSurfaceHolder = getHolder();
+        mSurfaceHolder.addCallback(this);
+        setFocusable(true);
+        setFocusableInTouchMode(true);
+        this.setKeepScreenOn(true);
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+        startDraw = true;
+        new Thread(this).start();
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
 
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
         startDraw = false;
+        mBitmap.recycle();
     }
 
     @Override
@@ -60,6 +111,7 @@ public class WhiteBoard extends SurfaceView implements SurfaceHolder.Callback, R
         while (startDraw) {
             draw();
         }
+
     }
 
     private void draw() {
@@ -73,6 +125,7 @@ public class WhiteBoard extends SurfaceView implements SurfaceHolder.Callback, R
             mPaint.setColor(Color.BLACK);
             mCanvas.drawPath(mPath, mPaint);
             canvas.drawPath(mPath, mPaint);
+            setmDrawable();
         } catch (Exception e) {
         } finally {
             if (mCanvas != null) {
@@ -100,13 +153,15 @@ public class WhiteBoard extends SurfaceView implements SurfaceHolder.Callback, R
 
     public void reset() {
         mPath.reset();
-    }
-
-    public Bitmap getmBitmap() {
-        return mBitmap;
+        mBitmap.recycle();
     }
 
     public Drawable getDrawable() {
-        return new BitmapDrawable(mBitmap);
+        return mDrawable;
+    }
+
+    private void setmDrawable() {
+        mDrawable = new BitmapDrawable(mBitmap);
     }
 }
+
